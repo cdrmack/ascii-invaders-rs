@@ -1,10 +1,11 @@
 use std::io;
-use std::{error::Error, time};
+use std::{error::Error, time::Duration};
 
 use crossterm::{
+    event::{self, Event, KeyCode},
+    ExecutableCommand,
     cursor::{Hide, Show},
     terminal::{self, EnterAlternateScreen, LeaveAlternateScreen},
-    ExecutableCommand,
 };
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -16,7 +17,20 @@ fn main() -> Result<(), Box<dyn Error>> {
     stdout.execute(Hide)?;
 
     println!("sup");
-    std::thread::sleep(time::Duration::from_secs(1));
+    std::thread::sleep(Duration::from_secs(1));
+
+    'gameloop: loop {
+        while event::poll(Duration::default())? {
+            if let Event::Key(key_event) = event::read()? {
+                match key_event.code {
+                    KeyCode::Esc | KeyCode::Char('q') => {
+                        break 'gameloop;
+                    }
+                    _  => {}
+                }
+            }
+        }
+    }
 
     // restore terminal
     stdout.execute(Show)?;
