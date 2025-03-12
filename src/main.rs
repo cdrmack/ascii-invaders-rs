@@ -1,10 +1,11 @@
+use ascii_invaders_rs::render;
 use std::io;
 use std::{error::Error, time::Duration};
 
 use crossterm::{
-    event::{self, Event, KeyCode},
     ExecutableCommand,
     cursor::{Hide, Show},
+    event::{self, Event, KeyCode},
     terminal::{self, EnterAlternateScreen, LeaveAlternateScreen},
 };
 
@@ -16,20 +17,23 @@ fn main() -> Result<(), Box<dyn Error>> {
     stdout.execute(EnterAlternateScreen)?;
     stdout.execute(Hide)?;
 
-    println!("sup");
-    std::thread::sleep(Duration::from_secs(1));
+    let mut render_stdout = io::stdout();
 
     'gameloop: loop {
+        // input
         while event::poll(Duration::default())? {
             if let Event::Key(key_event) = event::read()? {
                 match key_event.code {
                     KeyCode::Esc | KeyCode::Char('q') => {
                         break 'gameloop;
                     }
-                    _  => {}
+                    _ => {}
                 }
             }
         }
+
+        // render
+        render::render(&mut render_stdout);
     }
 
     // restore terminal
